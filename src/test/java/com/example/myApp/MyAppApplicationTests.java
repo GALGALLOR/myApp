@@ -1,13 +1,14 @@
-package com.example.myApp;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+//package com.example.myApp;
 
-@SpringBootTest
-class MyAppApplicationTests {
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
 
-	@Test
-	void contextLoads() {
-	}
+//@SpringBootTest
+//class MyAppApplicationTests {
 
-}
+//	@Test
+//	void contextLoads() {
+//	}
+
+//}

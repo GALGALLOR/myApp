@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myApp
+spec:
+  selector:
+    matchLabels:
+      app: myApp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: myApp
+    spec:
+      volumes:
+        - name: logback-mount
+          configMap:
+            name: myApp-logback-configmap
+      containers:
+        - name: myApp
+          image: (_azureRegistryUrl)/(_openshiftProjectName)/(_openshiftProject):(_image_tag)
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+              scheme: HTTP
+              httpHeaders:
+                - name: Authorization
+                  value: Basic YWRtaW46YWRtaW4=
+            initialDelaySeconds: 120
+            periodSeconds: 150
+            timeoutSeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+              scheme: HTTP
+              httpHeaders:
+                - name: Authorization
+                  value: Basic YWRtaW46YWRtaW4=
+            initialDelaySeconds: 180
+            periodSeconds: 180
+            timeoutSeconds: 20
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: logback-mount
+              mountPath: /mnt/configmap/logback
+          env:
+            - name: JAVA_OPTIONS
+              value: '-XX:TieredStopAtLevel=1 -Xmx512m -Xss4m -Xms128m -XX:ParallelGCThreads=1 -XX:ConcGCThreads=1 -Dlog4j2.formatMsgNoLookups=true -Djava.util.concurrent.ForkJoinPool.common.parallelism=1'
+            - name: TZ
+              value: Africa/Nairobi
+            - name: JDBC_URL
+              value: jdbc:oracle:thin:@10.219.1.46:1525:MKTEST
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: kafka
+                  key: database.username
+
+
+          imagePullPolicy: Always
+      imagePullSecrets:
+        - name: arokcb-registry
